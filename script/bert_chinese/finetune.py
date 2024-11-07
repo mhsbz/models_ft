@@ -15,8 +15,8 @@ train_test_split = dataset['train'].train_test_split(test_size=0.1)
 train_dataset = train_test_split['train']
 test_dataset = train_test_split['test']
 
-tokenizer = BertTokenizer.from_pretrained('bert-base-chinese', local_files_only=True)
-model = BertForSequenceClassification.from_pretrained('bert-base-chinese', local_files_only=True)
+tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
+model = BertForSequenceClassification.from_pretrained('bert-base-chinese')
 
 # tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", local_files_only=True)
 # model = BertForSequenceClassification.from_pretrained('bert-base-uncased',local_files_only=True)
@@ -51,7 +51,7 @@ learn_rate = 2e-5
 batch_size = 16
 lr_scheduler_type = "cosine"
 
-output_dir = f"/Users/dxj/Desktop/self-project/model_ft/models/waimai_10k_bert/{datefmt}_e{num_epochs}_lrs{lr_scheduler_type}_lr{learn_rate}_bs{batch_size}"
+output_dir = f"/home/mark/projects/models_ft/models/waimai_10k_bert/{datefmt}_e{num_epochs}_lrs{lr_scheduler_type}_lr{learn_rate}_bs{batch_size}"
 
 training_args = TrainingArguments(
     output_dir=output_dir,

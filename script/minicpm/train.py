@@ -76,8 +76,8 @@ class SupervisedDataset(Dataset):
 def train(
         model_path: str = "openbmb/MiniCPM-2B-sft-bf16",
         output_dir: str = "models/MiniCPM-2B-sft-bf16/",
-        train_data_path: str = "/Users/dxj/Desktop/self-project/models_ft/data/AdvertiseGenChatML/train.json",
-        eval_data_path: str = "/Users/dxj/Desktop/self-project/models_ft/data/AdvertiseGenChatML/dev.json",
+        train_data_path: str = "/home/mark/projects/models_ft/data/AdvertiseGenChatML/train.json",
+        eval_data_path: str = "/home/mark/projects/models_ft/data/AdvertiseGenChatML/dev.json",
         device_map: str = "cuda",
         max_steps: int = 0,
         torch_dtype: torch.dtype = torch.bfloat16,
@@ -94,13 +94,17 @@ def train(
 ):
     ts = datetime.now().strftime("%Y%m%d_%H%M")
     output_dir = output_dir + f"{ts}"
-    tokenizer = AutoTokenizer.from_pretrained("openbmb/MiniCPM-2B-sft-bf16", trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+    tokenizer.pad_token = tokenizer.eos_token
+
     print("tokenizer.pad_token", tokenizer.pad_token)
     print("tokenizer.eos_token_id", tokenizer.eos_token)
-    tokenizer.pad_token = tokenizer.eos_token
+    print("tokenizer.length", len(tokenizer))
 
     model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch_dtype, device_map=device_map,
                                                  trust_remote_code=True)
+
+    # model.resize_token_embeddings(len(tokenizer))
 
     if not targe_modules:
         print("model.config.architectures--", model.config.architectures)
@@ -132,10 +136,11 @@ def train(
         warmup_steps=100,
         num_train_epochs=num_train_epochs,
         optim="adamw_hf",
+        lr_scheduler_type="cosine",
         eval_steps=50,
         seed=42,
         logging_steps=5,
-        save_steps=100,
+        save_steps=200,
         max_grad_norm=0.3,
         max_steps=max_steps,
     )
@@ -157,12 +162,14 @@ def train(
 
 if __name__ == '__main__':
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(device)
 
     train(model_path="openbmb/MiniCPM-1B-sft-bf16",
-          output_dir="/Users/dxj/Desktop/self-project/models_ft/models/MiniCPM-1B-sft-bf16",
-          max_steps=1000,
+          output_dir="/home/mark/projects/models_ft/models/MiniCPM-1B-sft-bf16",
+          # max_steps=10000,
+          num_train_epochs=1,
           device_map=device,
           model_max_length=1024,
-          train_data_path="/Users/dxj/Desktop/self-project/models_ft/data/lettersChatML/train.json",
-          eval_data_path="/Users/dxj/Desktop/self-project/models_ft/data/lettersChatML/dev.json"
+          learning_rate=5e-3,
+          per_device_train_batch_size=2
           )
