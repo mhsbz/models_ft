@@ -76,8 +76,8 @@ class SupervisedDataset(Dataset):
 def train(
         model_path: str = "openbmb/MiniCPM-2B-sft-bf16",
         output_dir: str = "models/MiniCPM-2B-sft-bf16/",
-        train_data_path: str = "data/AdvertiseGenChatML/train.json",
-        eval_data_path: str = "data/AdvertiseGenChatML/dev.json",
+        train_data_path: str = "/Users/dxj/Desktop/self-project/models_ft/data/AdvertiseGenChatML/train.json",
+        eval_data_path: str = "/Users/dxj/Desktop/self-project/models_ft/data/AdvertiseGenChatML/dev.json",
         device_map: str = "cuda",
         max_steps: int = 0,
         torch_dtype: torch.dtype = torch.bfloat16,
@@ -160,8 +160,10 @@ if __name__ == '__main__':
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     train(model_path="openbmb/MiniCPM-1B-sft-bf16",
-          output_dir="output/MiniCPM-1B-sft-bf16",
+          output_dir="/Users/dxj/Desktop/self-project/models_ft/models/MiniCPM-1B-sft-bf16",
           max_steps=100,
           device_map=device,
-          model_max_length=1024
+          model_max_length=1024,
+          train_data_path="/Users/dxj/Desktop/self-project/models_ft/data/lettersChatML/train.json",
+            eval_data_path="/Users/dxj/Desktop/self-project/models_ft/data/lettersChatML/dev.json"
           )

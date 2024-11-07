@@ -5,7 +5,7 @@ from datetime import datetime
 
 import torch
 from datasets import load_dataset
-from transformers import BertTokenizer, BertForSequenceClassification,DataCollatorWithPadding
+from transformers import BertTokenizer, BertForSequenceClassification, DataCollatorWithPadding
 from transformers import TrainingArguments, Trainer
 
 dataset = load_dataset("XiangPan/waimai_10k")
@@ -15,8 +15,8 @@ train_test_split = dataset['train'].train_test_split(test_size=0.1)
 train_dataset = train_test_split['train']
 test_dataset = train_test_split['test']
 
-tokenizer = BertTokenizer.from_pretrained('bert-base-chinese',local_files_only=True)
-model = BertForSequenceClassification.from_pretrained('bert-base-chinese',local_files_only=True)
+tokenizer = BertTokenizer.from_pretrained('bert-base-chinese', local_files_only=True)
+model = BertForSequenceClassification.from_pretrained('bert-base-chinese', local_files_only=True)
 
 # tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", local_files_only=True)
 # model = BertForSequenceClassification.from_pretrained('bert-base-uncased',local_files_only=True)
@@ -28,6 +28,7 @@ model = model.to(device)
 def encode_examples(examples):
     resp = tokenizer(examples['text'], truncation=True, padding='max_length', max_length=128)
     return resp
+
 
 def compute_metrics(pred):
     labels = pred.label_ids
@@ -41,7 +42,6 @@ test_encoded_dataset = test_dataset.map(encode_examples, batched=False)
 print(train_encoded_dataset)
 print(test_encoded_dataset)
 
-
 data_collator = DataCollatorWithPadding(tokenizer)
 
 datefmt = datetime.now().strftime("%Y%m%d%H%M")
@@ -50,8 +50,6 @@ num_epochs = 1
 learn_rate = 2e-5
 batch_size = 16
 lr_scheduler_type = "cosine"
-
-
 
 output_dir = f"/Users/dxj/Desktop/self-project/model_ft/models/waimai_10k_bert/{datefmt}_e{num_epochs}_lrs{lr_scheduler_type}_lr{learn_rate}_bs{batch_size}"
 
@@ -70,7 +68,6 @@ training_args = TrainingArguments(
     report_to="wandb",
     optim="adamw_hf",
     warmup_steps=100,
-
 )
 
 trainer = Trainer(
@@ -82,10 +79,8 @@ trainer = Trainer(
     compute_metrics=compute_metrics,
 )
 
+# os.environ["WANDB_DIR"] = "/Users/dxj/Desktop/self-project/models_ft/logs"
+
 trainer.train()
 
 # trainer.evaluate()
-
-
-
-
