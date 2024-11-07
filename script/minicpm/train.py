@@ -87,9 +87,9 @@ def train(
         per_device_eval_batch_size: int = 1,
         learning_rate: float = 5e-5,
 
-        lora_r: int = 64,
-        lora_alpha: int = 32,
-        lora_dropout: float = 0.1,
+        lora_r: int = 16,
+        lora_alpha: int = 16,
+        lora_dropout: float = 0.05,
         targe_modules: List[str] = None,
 ):
     ts = datetime.now().strftime("%Y%m%d_%H%M")
@@ -133,13 +133,14 @@ def train(
         per_device_eval_batch_size=per_device_eval_batch_size,
         bf16=True,
         gradient_accumulation_steps=1,
-        warmup_steps=100,
+        # warmup_steps=100,
         num_train_epochs=num_train_epochs,
         optim="adamw_hf",
         lr_scheduler_type="cosine",
         eval_steps=50,
         seed=42,
         logging_steps=5,
+        warmup_ratio=0.1,
         save_steps=200,
         max_grad_norm=0.3,
         max_steps=max_steps,
@@ -170,6 +171,6 @@ if __name__ == '__main__':
           num_train_epochs=1,
           device_map=device,
           model_max_length=1024,
-          learning_rate=5e-3,
+          learning_rate=1e-4,
           per_device_train_batch_size=2
           )
