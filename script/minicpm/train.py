@@ -1,8 +1,8 @@
 import json
+from datetime import datetime
 from typing import Dict, List
 
 import torch
-from datetime import datetime
 from peft import LoraConfig, TaskType, get_peft_model
 from torch.utils.data import Dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM, Trainer, TrainingArguments
@@ -134,7 +134,7 @@ def train(
         optim="adamw_hf",
         eval_steps=50,
         seed=42,
-        logging_steps=50,
+        logging_steps=5,
         save_steps=100,
         max_grad_norm=0.3,
         max_steps=max_steps,
@@ -156,14 +156,13 @@ def train(
 
 
 if __name__ == '__main__':
-
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     train(model_path="openbmb/MiniCPM-1B-sft-bf16",
           output_dir="/Users/dxj/Desktop/self-project/models_ft/models/MiniCPM-1B-sft-bf16",
-          max_steps=100,
+          max_steps=1000,
           device_map=device,
           model_max_length=1024,
           train_data_path="/Users/dxj/Desktop/self-project/models_ft/data/lettersChatML/train.json",
-            eval_data_path="/Users/dxj/Desktop/self-project/models_ft/data/lettersChatML/dev.json"
+          eval_data_path="/Users/dxj/Desktop/self-project/models_ft/data/lettersChatML/dev.json"
           )
