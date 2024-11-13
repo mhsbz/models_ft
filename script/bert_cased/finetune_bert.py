@@ -17,8 +17,8 @@ def tokenize_function(examples):
 
 tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
-small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(1000))
-small_eval_dataset = tokenized_datasets["test"].shuffle(seed=42).select(range(100))
+small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(10000))
+small_eval_dataset = tokenized_datasets["test"].shuffle(seed=42).select(range(10000))
 
 model = AutoModelForSequenceClassification.from_pretrained("google-bert/bert-base-cased", num_labels=5)
 
@@ -32,9 +32,9 @@ def compute_metrics(eval_pred):
 
 
 training_args = TrainingArguments(output_dir="test_trainer",
-                                  max_steps=200,
+                                  num_train_epochs=3,
                                   logging_steps=10,
-                                  eval_steps=20)
+                                  eval_steps=200)
 
 trainer = Trainer(
     model=model,
