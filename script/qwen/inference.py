@@ -11,9 +11,9 @@ model.to("mps")
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 # prompt = "Give me a short introduction to large language model."
-prompt = "can you translate 'introduction' to Chinese?"
+prompt = "一个颜色的列表：红，蓝"
 messages = [
-    {"role": "system", "content": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."},
+    {"role": "system", "content": "你是千问，你是个有用的机器人"},
     {"role": "user", "content": prompt}
 ]
 text = tokenizer.apply_chat_template(
