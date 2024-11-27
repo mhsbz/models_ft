@@ -156,7 +156,7 @@ def train(
         seed=42,
         logging_steps=10,
         warmup_ratio=0.1,
-        save_steps=1000,
+        save_steps=10000,
         max_grad_norm=0.3,
         max_steps=max_steps,
     )
@@ -185,11 +185,11 @@ if __name__ == '__main__':
     train(model_path="openbmb/MiniCPM3-4B",
           train_data_path="/home/mark/projects/models_ft/data/AdvertiseGenChatML/train.json",
           eval_data_path="/home/mark/projects/models_ft/data/AdvertiseGenChatML/dev.json",
-          output_dir="/home/mark/projects/models_ft/models/MiniCPM-1B-sft-bf16",
-          # max_steps=10000,
+          output_dir="/home/mark/projects/models_ft/models/MiniCPM3-4B-adv_gen",
+          max_steps=10000,
           num_train_epochs=1,
           device_map=device,
-          model_max_length=284,
+          model_max_length=256,
           learning_rate=2e-5,
           per_device_train_batch_size=1
           )
