@@ -1,3 +1,4 @@
 models
 .idea
 script/minicpm/wandb
+data
