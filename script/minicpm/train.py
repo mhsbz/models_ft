@@ -31,17 +31,31 @@ class SupervisedDataset(Dataset):
 
         for message in example["messages"]:
             role = message["role"]
+            content = message["content"]
 
             ## content_ids是词汇表列表
             content_ids = self.tokenizer.apply_chat_template([message])
 
-            if role == "user" or role == "system":
+            if role == "user":
+                if self.tokenizer.eos_token_id == 73440:
+                    input_ids += self.tokenizer.apply_chat_template([message], add_generation_prompt=True)
+                    label_ids += [self.ignored_index] * len(
+                        self.tokenizer.apply_chat_template([message], add_generation_prompt=True))
+                else:
+                    input_ids += content_ids
+                    label_ids += [self.ignored_index] * len(content_ids)
+
+            elif role == "system":
                 input_ids += content_ids
                 label_ids += [self.ignored_index] * len(content_ids)
 
             elif role == "assistant":
-                input_ids += content_ids
-                label_ids += content_ids
+                if self.tokenizer.eos_token_id == 73440:
+                    input_ids += self.tokenizer.encode(content,add_special_tokens=False)
+                    label_ids += self.tokenizer.encode(content,add_special_tokens=False)
+                else:
+                    input_ids += content_ids
+                    label_ids += content_ids
 
         input_ids.append(self.tokenizer.eos_token_id)
         label_ids.append(self.tokenizer.eos_token_id)
@@ -136,13 +150,13 @@ def train(
         gradient_accumulation_steps=1,
         # warmup_steps=100,
         num_train_epochs=num_train_epochs,
-        optim="adamw_hf",
+        optim="paged_adamw_8bit",
         lr_scheduler_type="cosine",
-        eval_steps=50,
+        eval_steps=100,
         seed=42,
-        logging_steps=5,
+        logging_steps=10,
         warmup_ratio=0.1,
-        save_steps=200,
+        save_steps=1000,
         max_grad_norm=0.3,
         max_steps=max_steps,
     )
@@ -168,14 +182,14 @@ if __name__ == '__main__':
     if platform.system() == "Darwin":
         device = "mps"
 
-    train(model_path="openbmb/MiniCPM-1B-sft-bf16",
-          train_data_path="/Users/dxj/Desktop/self-project/models_ft/data/AdvertiseGenChatML/train.json",
-          eval_data_path="/Users/dxj/Desktop/self-project/models_ft/data/AdvertiseGenChatML/dev.json",
-          output_dir="/Users/dxj/Desktop/self-project/models_ft/models/MiniCPM-1B-sft-bf16",
+    train(model_path="openbmb/MiniCPM3-4B",
+          train_data_path="/home/mark/projects/models_ft/data/AdvertiseGenChatML/train.json",
+          eval_data_path="/home/mark/projects/models_ft/data/AdvertiseGenChatML/dev.json",
+          output_dir="/home/mark/projects/models_ft/models/MiniCPM-1B-sft-bf16",
           # max_steps=10000,
           num_train_epochs=1,
           device_map=device,
           model_max_length=284,
-          learning_rate=1e-4,
+          learning_rate=2e-5,
           per_device_train_batch_size=1
           )
