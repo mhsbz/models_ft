@@ -1,4 +1,5 @@
 import json
+import platform
 from datetime import datetime
 from typing import Dict, List
 
@@ -163,14 +164,18 @@ def train(
 
 if __name__ == '__main__':
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(device)
+
+    if platform.system() == "Darwin":
+        device = "mps"
 
     train(model_path="openbmb/MiniCPM-1B-sft-bf16",
-          output_dir="/home/mark/projects/models_ft/models/MiniCPM-1B-sft-bf16",
+          train_data_path="/Users/dxj/Desktop/self-project/models_ft/data/AdvertiseGenChatML/train.json",
+          eval_data_path="/Users/dxj/Desktop/self-project/models_ft/data/AdvertiseGenChatML/dev.json",
+          output_dir="/Users/dxj/Desktop/self-project/models_ft/models/MiniCPM-1B-sft-bf16",
           # max_steps=10000,
           num_train_epochs=1,
           device_map=device,
-          model_max_length=1024,
+          model_max_length=284,
           learning_rate=1e-4,
-          per_device_train_batch_size=2
+          per_device_train_batch_size=1
           )
