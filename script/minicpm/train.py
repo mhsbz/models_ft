@@ -147,13 +147,14 @@ def train(
         per_device_train_batch_size=per_device_train_batch_size,
         per_device_eval_batch_size=per_device_eval_batch_size,
         bf16=True,
-        gradient_accumulation_steps=1,
+        gradient_accumulation_steps=4,
         # warmup_steps=100,
         num_train_epochs=num_train_epochs,
         optim="paged_adamw_8bit",
         lr_scheduler_type="cosine",
         eval_steps=100,
         seed=42,
+        eval_strategy="steps",
         logging_steps=10,
         warmup_ratio=0.1,
         save_steps=10000,
@@ -183,13 +184,14 @@ if __name__ == '__main__':
         device = "mps"
 
     train(model_path="openbmb/MiniCPM3-4B",
-          train_data_path="/home/mark/projects/models_ft/data/AdvertiseGenChatML/train.json",
-          eval_data_path="/home/mark/projects/models_ft/data/AdvertiseGenChatML/dev.json",
-          output_dir="/home/mark/projects/models_ft/models/MiniCPM3-4B-adv_gen",
-          max_steps=10000,
+          train_data_path="/home/dxj/projects/models_ft/data/AdvertiseGenChatML/train.json",
+          eval_data_path="/home/dxj/projects/models_ft/data/AdvertiseGenChatML/dev.json",
+          output_dir="/home/dxj/projects/models_ft/models/MiniCPM3-4B-adv_gen",
+          max_steps=2500,
           num_train_epochs=1,
           device_map=device,
           model_max_length=256,
           learning_rate=2e-5,
-          per_device_train_batch_size=1
+          per_device_train_batch_size=4,
+          per_device_eval_batch_size=4
           )
