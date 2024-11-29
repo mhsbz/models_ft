@@ -5,7 +5,7 @@ device = "cuda"
 
 tokenizer = AutoTokenizer.from_pretrained("THUDM/glm-4-9b-chat", trust_remote_code=True)
 
-query = "你好"
+query = "推荐5个北京的景点。"
 
 inputs = tokenizer.apply_chat_template([{"role": "user", "content": query}],
                                        add_generation_prompt=True,

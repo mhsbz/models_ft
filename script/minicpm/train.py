@@ -102,7 +102,7 @@ def train(
         per_device_eval_batch_size: int = 1,
         learning_rate: float = 5e-5,
 
-        lora_r: int = 16,
+        lora_r: int = 32,
         lora_alpha: int = 16,
         lora_dropout: float = 0.05,
         targe_modules: List[str] = None,
@@ -116,7 +116,7 @@ def train(
     print("tokenizer.eos_token_id", tokenizer.eos_token)
     print("tokenizer.length", len(tokenizer))
 
-    model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch_dtype, device_map=device_map,
+    model = AutoModelForCausalLM.from_pretrained(model_path,torch_dtype=torch_dtype, device_map=device_map,
                                                  trust_remote_code=True)
 
     # model.resize_token_embeddings(len(tokenizer))
@@ -157,8 +157,8 @@ def train(
         eval_strategy="steps",
         logging_steps=10,
         warmup_ratio=0.1,
-        save_steps=10000,
-        max_grad_norm=0.3,
+        save_steps=200,
+        max_grad_norm=0.05,
         max_steps=max_steps,
     )
 
@@ -183,15 +183,15 @@ if __name__ == '__main__':
     if platform.system() == "Darwin":
         device = "mps"
 
-    train(model_path="openbmb/MiniCPM3-4B",
+    train(model_path="openbmb/MiniCPM-1B-sft-bf16",
           train_data_path="/home/dxj/projects/models_ft/data/AdvertiseGenChatML/train.json",
           eval_data_path="/home/dxj/projects/models_ft/data/AdvertiseGenChatML/dev.json",
-          output_dir="/home/dxj/projects/models_ft/models/MiniCPM3-4B-adv_gen",
-          max_steps=2500,
+          output_dir="/home/dxj/projects/models_ft/models/MiniCPM-1B-sft-bf16-adv_gen",
+          max_steps=2000,
           num_train_epochs=1,
           device_map=device,
           model_max_length=256,
-          learning_rate=2e-5,
-          per_device_train_batch_size=4,
-          per_device_eval_batch_size=4
+          learning_rate=8e-4,
+          per_device_train_batch_size=16,
+          per_device_eval_batch_size=16
           )
