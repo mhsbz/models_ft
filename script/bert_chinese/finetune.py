@@ -5,48 +5,52 @@ import json
 from datetime import datetime
 
 import torch
-from datasets import load_dataset
+from datasets import Dataset
+from tqdm import tqdm
 from transformers import BertTokenizer, BertForSequenceClassification, DataCollatorWithPadding
 from transformers import TrainingArguments, Trainer
 
-# dataset = load_dataset("XiangPan/waimai_10k")
-
-with open("/home/dxj/projects/models_ft/data/cmm/data_eval_fixed_shuffled.json","r",encoding='utf-8') as f:
+with open("/Users/dxj/Desktop/self-project/models_ft/data/cmm/data_eval_fixed_shuffled.json", "r",
+          encoding='utf-8') as f:
     data = json.load(f)
 
-dataset = {
-    "train":[]
-}
-for item in data:
+print("len data:", len(data))
+
+train_data = {"text": [], "label": []}
+test_data = {"text": [], "label": []}
+
+for idx, item in enumerate(tqdm(data)):
+    label = 0
+    if item["messages"][2]["content"] == "达人":
+        label = 1
+    elif item["messages"][2]["content"] == "店铺":
+        label = 2
+    elif item["messages"][2]["content"] == "品牌":
+        label = 3
+
     row = {
-        "text": item["messages"][0]["content"],
-        "label": item["messages"][2]["content"],
+        "text": item["messages"][1]["content"],
+        "label": label,
     }
-    dataset["train"].append(row)
+    if idx < 30000:
+        train_data["text"].append(row["text"])
+        train_data["label"].append(row["label"])
+    else:
+        test_data["text"].append(row["text"])
+        test_data["label"].append(row["label"])
 
-
-
-
-print(dataset)
-
-train_test_split = dataset['train'].train_test_split(test_size=0.1)
-
-train_dataset = train_test_split['train']
-test_dataset = train_test_split['test']
+train_dataset = Dataset.from_dict(train_data)
+test_dataset = Dataset.from_dict(test_data)
 
 tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
 model = BertForSequenceClassification.from_pretrained('bert-base-chinese')
-
-# tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", local_files_only=True)
-# model = BertForSequenceClassification.from_pretrained('bert-base-uncased',local_files_only=True)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model = model.to(device)
 
 
 def encode_examples(examples):
-    resp = tokenizer(examples['text'], truncation=True, padding='max_length', max_length=128)
-    return resp
+    return tokenizer(examples['text'], truncation=True, padding='max_length', max_length=128)
 
 
 def compute_metrics(pred):
@@ -55,8 +59,8 @@ def compute_metrics(pred):
     return {"accuracy": (preds == labels).mean()}
 
 
-train_encoded_dataset = train_dataset.map(encode_examples, batched=False)
-test_encoded_dataset = test_dataset.map(encode_examples, batched=False)
+train_encoded_dataset = train_dataset.map(encode_examples, batched=True)
+test_encoded_dataset = test_dataset.map(encode_examples, batched=True)
 
 print(train_encoded_dataset)
 print(test_encoded_dataset)
@@ -70,7 +74,7 @@ learn_rate = 2e-5
 batch_size = 16
 lr_scheduler_type = "cosine"
 
-output_dir = f"/home/mark/projects/models_ft/models/waimai_10k_bert/{datefmt}_e{num_epochs}_lrs{lr_scheduler_type}_lr{learn_rate}_bs{batch_size}"
+output_dir = f"./{datefmt}_e{num_epochs}_lrs{lr_scheduler_type}_lr{learn_rate}_bs{batch_size}"
 
 training_args = TrainingArguments(
     output_dir=output_dir,
@@ -98,8 +102,5 @@ trainer = Trainer(
     compute_metrics=compute_metrics,
 )
 
-# os.environ["WANDB_DIR"] = "/Users/dxj/Desktop/self-project/models_ft/logs"
-
 trainer.train()
-
-# trainer.evaluate()
+trainer.evaluate()
