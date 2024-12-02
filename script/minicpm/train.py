@@ -142,28 +142,31 @@ def train(
     model.print_trainable_parameters()
 
     train_args = TrainingArguments(
+        do_train=True,
         output_dir=output_dir,
         learning_rate=learning_rate,
         per_device_train_batch_size=per_device_train_batch_size,
         per_device_eval_batch_size=per_device_eval_batch_size,
         bf16=True,
-        gradient_accumulation_steps=4,
-        # warmup_steps=100,
+        gradient_accumulation_steps=1,
+        # warmup_steps=200,
         num_train_epochs=num_train_epochs,
         optim="paged_adamw_8bit",
         lr_scheduler_type="cosine",
-        eval_steps=100,
+        eval_steps=1000,
         seed=42,
-        eval_strategy="steps",
+        # eval_strategy="steps",
         logging_steps=10,
         warmup_ratio=0.1,
-        save_steps=200,
-        max_grad_norm=0.05,
+        save_steps=1000,
+        # max_grad_norm=0.3,
         max_steps=max_steps,
     )
 
     train_dataset = SupervisedDataset(data_path=train_data_path, tokenizer=tokenizer, model_max_length=model_max_length)
     eval_dataset = SupervisedDataset(data_path=eval_data_path, tokenizer=tokenizer, model_max_length=model_max_length)
+
+    print("train_dataset.length---", len(train_dataset))
 
     trainer = Trainer(
         model=model,
@@ -183,15 +186,16 @@ if __name__ == '__main__':
     if platform.system() == "Darwin":
         device = "mps"
 
+    print("user {} to run model...".format(device))
     train(model_path="openbmb/MiniCPM-1B-sft-bf16",
-          train_data_path="/home/dxj/projects/models_ft/data/AdvertiseGenChatML/train.json",
-          eval_data_path="/home/dxj/projects/models_ft/data/AdvertiseGenChatML/dev.json",
-          output_dir="/home/dxj/projects/models_ft/models/MiniCPM-1B-sft-bf16-adv_gen",
-          max_steps=2000,
+          train_data_path="/home/dxj/projects/models_ft/data/cmm/data_eval_fixed_shuffled.json",
+          eval_data_path="/home/dxj/projects/models_ft/data/cmm/data_eval_fixed_shuffled.json",
+          output_dir="/home/dxj/projects/models_ft/models/MiniCPM-1B-sft-bf16_cmm",
+          # max_steps=2000,
           num_train_epochs=1,
           device_map=device,
-          model_max_length=256,
-          learning_rate=8e-4,
-          per_device_train_batch_size=16,
-          per_device_eval_batch_size=16
+          model_max_length=128,
+          learning_rate=2e-5,
+          per_device_train_batch_size=32,
+          per_device_eval_batch_size=32
           )

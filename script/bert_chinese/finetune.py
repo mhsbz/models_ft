@@ -1,6 +1,7 @@
 """
 训练bert做情感分类
 """
+import json
 from datetime import datetime
 
 import torch
@@ -8,7 +9,25 @@ from datasets import load_dataset
 from transformers import BertTokenizer, BertForSequenceClassification, DataCollatorWithPadding
 from transformers import TrainingArguments, Trainer
 
-dataset = load_dataset("XiangPan/waimai_10k")
+# dataset = load_dataset("XiangPan/waimai_10k")
+
+with open("/home/dxj/projects/models_ft/data/cmm/data_eval_fixed_shuffled.json","r",encoding='utf-8') as f:
+    data = json.load(f)
+
+dataset = {
+    "train":[]
+}
+for item in data:
+    row = {
+        "text": item["messages"][0]["content"],
+        "label": item["messages"][2]["content"],
+    }
+    dataset["train"].append(row)
+
+
+
+
+print(dataset)
 
 train_test_split = dataset['train'].train_test_split(test_size=0.1)
 
