@@ -43,7 +43,7 @@ train_dataset = Dataset.from_dict(train_data)
 test_dataset = Dataset.from_dict(test_data)
 
 tokenizer = BertTokenizer.from_pretrained('google-bert/bert-base-chinese')
-model = BertForSequenceClassification.from_pretrained('google-bert/bert-base-chinese')
+model = BertForSequenceClassification.from_pretrained('google-bert/bert-base-chinese',num_labels=3)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model = model.to(device)
@@ -89,7 +89,7 @@ training_args = TrainingArguments(
     learning_rate=learn_rate,
     lr_scheduler_type=lr_scheduler_type,
     report_to="wandb",
-    optim="adamw_hf",
+    # optim="adamw_hf",
     warmup_steps=100,
 )
 
