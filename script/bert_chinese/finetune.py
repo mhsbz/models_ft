@@ -10,7 +10,7 @@ from tqdm import tqdm
 from transformers import BertTokenizer, BertForSequenceClassification, DataCollatorWithPadding
 from transformers import TrainingArguments, Trainer
 
-with open("/Users/dxj/Desktop/self-project/models_ft/data/cmm/data_eval_fixed_shuffled.json", "r",
+with open("/home/dxj/projects/models_ft/data/cmm/data_eval_fixed_shuffled.json", "r",
           encoding='utf-8') as f:
     data = json.load(f)
 
@@ -42,8 +42,8 @@ for idx, item in enumerate(tqdm(data)):
 train_dataset = Dataset.from_dict(train_data)
 test_dataset = Dataset.from_dict(test_data)
 
-tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
-model = BertForSequenceClassification.from_pretrained('bert-base-chinese')
+tokenizer = BertTokenizer.from_pretrained('google-bert/bert-base-chinese')
+model = BertForSequenceClassification.from_pretrained('google-bert/bert-base-chinese')
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model = model.to(device)
