@@ -1,15 +1,21 @@
 import torch
 from datasets import load_dataset
+from huggingface_hub import HfApi
 from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
+
+# 登录 Hugging Face 账户
+HfApi().login(token="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")
+
 
 def compute_metrics(pred):
     labels = pred.label_ids
     preds = pred.predictions.argmax(-1)
     return {"accuracy": (preds == labels).mean()}
 
+
 # 参数设置
 train_file = 'data_train.csv'  # 训练数据文件路径
-test_file = 'data_eval.csv'    # 测试数据文件路径
+test_file = 'data_eval.csv'  # 测试数据文件路径
 model_name = 'google-bert/bert-base-chinese'  # 使用的中BERT模型
 max_length = 32  # 输入序列的最大长度
 batch_size = 256  # 批处理大小
@@ -21,10 +27,13 @@ dataset = load_dataset('csv', data_files={'train': train_file, 'test': test_file
 
 # 初始化分词器
 tokenizer = BertTokenizer.from_pretrained(model_name)
+
+
 # 数据预处理函数
 def preprocess_function(examples):
-   ipt = tokenizer(examples['text'], truncation=True, padding='max_length', max_length=max_length)
-   return ipt
+    ipt = tokenizer(examples['text'], truncation=True, padding='max_length', max_length=max_length)
+    return ipt
+
 
 # 对数据集进行预处理
 tokenized_dataset = dataset.map(preprocess_function, batched=True)
@@ -34,13 +43,13 @@ model = BertForSequenceClassification.from_pretrained(model_name, num_labels=num
 
 # 定义训练参数
 training_args = TrainingArguments(
-    output_dir='./results',          # 输出目录
-    num_train_epochs=num_epochs,     # 训练轮数
+    output_dir='./results',  # 输出目录
+    num_train_epochs=num_epochs,  # 训练轮数
     per_device_train_batch_size=batch_size,  # 批处理大小
-    per_device_eval_batch_size=256,   # 评估时的批处理大小
-    warmup_steps=500,                # 热身步骤
-    weight_decay=0.01,               # 权重衰减
-    logging_dir='./logs',            # 日志目录
+    per_device_eval_batch_size=256,  # 评估时的批处理大小
+    warmup_steps=500,  # 热身步骤
+    weight_decay=0.01,  # 权重衰减
+    logging_dir='./logs',  # 日志目录
     logging_steps=10,
     learning_rate=5e-5,
     lr_scheduler_type="cosine",
@@ -48,6 +57,8 @@ training_args = TrainingArguments(
     evaluation_strategy="steps",
     eval_steps=100,
     save_steps=1000,
+    push_to_hub=True,
+    hub_model_id="puppet/douyin_bert-chinese-word",
 )
 
 # 初始化Trainer
