@@ -1,10 +1,9 @@
-import torch
-from datasets import load_dataset
-from huggingface_hub import HfApi
-from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
 
+from datasets import load_dataset
+from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
+import torch.nn as nn
 # 登录 Hugging Face 账户
-HfApi().login(token="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")
+# HfApi.login(token="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")
 
 
 def compute_metrics(pred):
@@ -19,14 +18,14 @@ test_file = 'data_eval.csv'  # 测试数据文件路径
 model_name = 'google-bert/bert-base-chinese'  # 使用的中BERT模型
 max_length = 32  # 输入序列的最大长度
 batch_size = 256  # 批处理大小
-num_epochs = 1  # 训练轮数
+num_epochs = 5  # 训练轮数
 num_labels = 3  # 分类任务的类别数量
 
 # 加载数据集
 dataset = load_dataset('csv', data_files={'train': train_file, 'test': test_file})
 
 # 初始化分词器
-tokenizer = BertTokenizer.from_pretrained(model_name)
+tokenizer = BertTokenizer.from_pretrained(model_name,local_files_only=True)
 
 
 # 数据预处理函数
@@ -39,36 +38,41 @@ def preprocess_function(examples):
 tokenized_dataset = dataset.map(preprocess_function, batched=True)
 
 # 初始化模型
-model = BertForSequenceClassification.from_pretrained(model_name, num_labels=num_labels).to("cuda")
+model = BertForSequenceClassification.from_pretrained(model_name, num_labels=num_labels,local_files_only=True).to("cuda")
 
 # 定义训练参数
 training_args = TrainingArguments(
     output_dir='./results',  # 输出目录
     num_train_epochs=num_epochs,  # 训练轮数
     per_device_train_batch_size=batch_size,  # 批处理大小
-    per_device_eval_batch_size=256,  # 评估时的批处理大小
+    per_device_eval_batch_size=batch_size,  # 评估时的批处理大小
     warmup_steps=500,  # 热身步骤
     weight_decay=0.01,  # 权重衰减
     logging_dir='./logs',  # 日志目录
     logging_steps=10,
-    learning_rate=5e-5,
-    lr_scheduler_type="cosine",
+    gradient_accumulation_steps=1,
+    learning_rate=1e-6,
+    lr_scheduler_type="linear",
     metric_for_best_model="accuracy",
     evaluation_strategy="steps",
     eval_steps=100,
     save_steps=1000,
-    push_to_hub=True,
-    hub_model_id="puppet/douyin_bert-chinese-word",
+    # push_to_hub=True,
+    # hub_model_id="Alchemist-mohan/douyin_bert-chinese-word",
 )
 
 # 初始化Trainer
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=tokenized_dataset['train'],
-    eval_dataset=tokenized_dataset['test'],
+    train_dataset=tokenized_dataset['train'].shuffle(seed=42),
+    eval_dataset=tokenized_dataset['test'].shuffle(seed=42),
     compute_metrics=compute_metrics,
 )
+
+
+print(training_args.to_dict())
+# trainer.compute_loss_func = nn.CrossEntropyLoss()
 
 # 训练模型
 trainer.train()

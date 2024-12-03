@@ -45,9 +45,9 @@ print(len(all_list))
 
 print(all_list[0])
 
-df1 = pd.DataFrame(all_list[:int(len(all_list)*0.8)], columns=["text", "label"])
-df2 = pd.DataFrame(all_list[int(len(all_list)*0.8):], columns=["text", "label"])
+df1 = pd.DataFrame(all_list, columns=["text", "label"])
+df2 = pd.DataFrame(all_list[int(len(all_list)*0.95):], columns=["text", "label"])
 
 
-df1.to_csv("./data_train.csv", index=False)
+df1.to_csv("./data_all.csv", index=False)
 df2.to_csv("./data_eval.csv", index=False)
