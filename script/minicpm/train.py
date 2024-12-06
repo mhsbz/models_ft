@@ -148,10 +148,10 @@ def train(
         per_device_train_batch_size=per_device_train_batch_size,
         per_device_eval_batch_size=per_device_eval_batch_size,
         bf16=True,
-        gradient_accumulation_steps=1,
+        gradient_accumulation_steps=8,
         # warmup_steps=200,
         num_train_epochs=num_train_epochs,
-        optim="paged_adamw_8bit",
+        # optim="paged_adamw_8bit",
         lr_scheduler_type="cosine",
         eval_steps=1000,
         seed=42,
@@ -188,14 +188,14 @@ if __name__ == '__main__':
 
     print("user {} to run model...".format(device))
     train(model_path="openbmb/MiniCPM-1B-sft-bf16",
-          train_data_path="/home/dxj/projects/models_ft/data/cmm/data_eval_fixed_shuffled.json",
-          eval_data_path="/home/dxj/projects/models_ft/data/cmm/data_eval_fixed_shuffled.json",
-          output_dir="/home/dxj/projects/models_ft/models/MiniCPM-1B-sft-bf16_cmm",
+          train_data_path="/home/dxj/projects/models_ft/data/AdvertiseGenChatML/train.json",
+          eval_data_path="/home/dxj/projects/models_ft/data/AdvertiseGenChatML/dev.json",
+          output_dir="/home/dxj/projects/models_ft/models/MiniCPM-1B-sft-bf16_adv_gen",
           # max_steps=2000,
           num_train_epochs=1,
           device_map=device,
-          model_max_length=128,
+          model_max_length=256,
           learning_rate=2e-5,
-          per_device_train_batch_size=32,
-          per_device_eval_batch_size=32
+          per_device_train_batch_size=8,
+          per_device_eval_batch_size=8
           )
